@@ -32,17 +32,59 @@ aws-security-sandbox/
 └── dev-account/            # Creates cross-account IAM role for auditing
 └── main.tf
 
-````
+```
 
 ---
 
 ## ✅ Prerequisites
 
-- AWS CLI configured as root or delegated admin account
-- Terraform installed (v1.3+ recommended)
-- Billing-enabled AWS account with AWS Organizations support
-- Email aliases for account creation (`your+dev@example.com`, etc.)
-- Some patience—account creation and propagation can take several minutes
+- AWS account with billing enabled
+- Access to the **AWS root user** (only for initial setup)
+- **AWS Organizations must be enabled manually** if it's your first time using it
+- Optional: Git + Terraform installed locally **or use CloudShell (recommended)**
+
+---
+
+### ⚠️ First-Time AWS Organizations Users
+
+Terraform cannot automatically create an AWS Organization. If you're using Organizations for the first time:
+
+1. Log into the AWS Console as the root user.
+2. Go to [AWS Organizations Console](https://console.aws.amazon.com/organizations).
+3. Click **“Create organization”** if prompted.
+4. Wait a minute or two for it to fully activate.
+5. Then re-run `terraform apply`.
+
+If you see this error:
+```
+
+AWSOrganizationsNotInUseException: Your account is not a member of an organization.
+
+````
+Just wait a moment and try again.
+
+---
+
+## 💻 Running Terraform in AWS CloudShell (Recommended)
+
+CloudShell is a browser-based shell that’s already authenticated with your root console session — ideal for setting up AWS Organizations.
+
+### Setup Steps for Terraform in CloudShell
+
+Terraform isn’t preinstalled in CloudShell, so you can install it using `tfenv`:
+
+```bash
+# Install tfenv
+git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+mkdir ~/bin
+ln -s ~/.tfenv/bin/* ~/bin/
+
+# Install and select the latest Terraform version
+tfenv install latest
+tfenv use 1.11.4
+````
+
+> ⚠️ Be sure to run `tfenv use <version>` to make it default.
 
 ---
 
@@ -53,7 +95,7 @@ aws-security-sandbox/
 ```bash
 git clone https://github.com/zarguell/aws-security-sandbox.git
 cd aws-security-sandbox
-````
+```
 
 ### 2. Create the Organization and Accounts
 
@@ -65,13 +107,13 @@ terraform init
 terraform apply
 ```
 
-> This creates the Security and Dev accounts. Save the account IDs from the output or AWS Console.
+Save the output account IDs — you'll need them for the next steps.
 
 ---
 
 ### 3. Set Up the Dev Account Role
 
-Update the `dev-account/main.tf` with your Security account ID.
+Update `dev-account/main.tf` with your actual Security account ID:
 
 ```hcl
 variable "security_account_id" {
@@ -79,7 +121,7 @@ variable "security_account_id" {
 }
 ```
 
-Then deploy:
+Then run:
 
 ```bash
 cd ../dev-account
@@ -91,7 +133,7 @@ terraform apply
 
 ### 4. Set Up the Security Account Infrastructure
 
-Update the `security-account/main.tf` with your Dev account ID.
+Update `security-account/main.tf` with your actual Dev account ID:
 
 ```hcl
 variable "dev_account_id" {
@@ -99,22 +141,13 @@ variable "dev_account_id" {
 }
 ```
 
-Then deploy:
+Then run:
 
 ```bash
 cd ../security-account
 terraform init
 terraform apply
 ```
-
----
-
-## 🔜 Next Steps
-
-* Add a Lambda function in the Security account to assume the Dev audit role.
-* Use the Lambda to collect IAM data and write to the S3 bucket.
-* Schedule it with EventBridge for periodic audits.
-* Optionally: add more accounts, roles, and monitoring tools (Security Hub, Config, GuardDuty).
 
 ---
 
