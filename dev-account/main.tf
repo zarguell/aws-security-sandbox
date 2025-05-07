@@ -6,13 +6,6 @@ provider "aws" {
   }
 }
 
-variable "dev_account_id" {
-  description = "The account ID of the Dev account"
-  type        = string
-}
-
-variable "security_account_id" {}
-
 resource "aws_iam_role" "audit_role" {
   provider = aws.dev
   name     = "CrossAccountAuditRole"
