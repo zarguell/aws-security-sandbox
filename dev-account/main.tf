@@ -2,8 +2,13 @@ provider "aws" {
   alias  = "dev"
   region = "us-east-1"
   assume_role {
-    role_arn = "arn:aws:iam::<DEV_ACCOUNT_ID>:role/OrganizationAccountAccessRole"
+    role_arn = "arn:aws:iam::${var.dev_account_id}:role/OrganizationAccountAccessRole"
   }
+}
+
+variable "dev_account_id" {
+  description = "The account ID of the Dev account"
+  type        = string
 }
 
 variable "security_account_id" {}
